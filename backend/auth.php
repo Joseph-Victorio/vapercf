@@ -5,7 +5,7 @@ if (isset($_POST['login'])) {
     $pass = $_POST['password'];
     if (!empty($username) && !empty($pass)) {
 
-        header('location: ../dashboard.php');
+        header('location: ../pages/admin/dashboard.php');
     } else {
         header("location: /");
     }
