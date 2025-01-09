@@ -1,10 +1,44 @@
 <?php
+session_start();
 include "backend/db.php";
+
+if (!isset($_SESSION['cart'])) {
+    $_SESSION['cart'] = [];
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add_to_cart') {
+    $item = [
+        'namaBarang' => $_POST['namaBarang'],
+        'hargaJual' => $_POST['hargaJual'],
+        'foto' => $_POST['foto'],
+        'quantity' => 1
+    ];
+
+    // Add item to session cart
+    $itemExists = false;
+    foreach ($_SESSION['cart'] as &$cartItem) {
+        if ($cartItem['namaBarang'] === $item['namaBarang']) {
+            $cartItem['quantity'] += 1; // Increase quantity if item exists
+            $itemExists = true;
+            break;
+        }
+    }
+    if (!$itemExists) {
+        $_SESSION['cart'][] = $item; // Add new item if it doesn't exist
+    }
+
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit();
+}
+
+// Count the number of items in the cart
+$cartItemCount = 0;
+foreach ($_SESSION['cart'] as $item) {
+    $cartItemCount += $item['quantity'];
+}
 
 $query = "SELECT * FROM inventory LIMIT 5";
 $sql = mysqli_query($conn, $query);
-
-
 ?>
 
 <!DOCTYPE html>
@@ -34,15 +68,14 @@ $sql = mysqli_query($conn, $query);
 
 <body class="bg-background">
     <nav class="bg-foreground flex flex-wrap justify-between items-center px-5 md:px-10 py-2">
-
         <div class="flex items-center gap-3 md:gap-5 relative w-full md:w-auto mt-2 md:mt-0">
             <img src="/img/logo.svg" alt="Logo" class="w-[30px] md:w-[40px]">
         </div>
         <div class="w-full md:w-auto flex justify-between md:justify-start">
             <div class="flex gap-3 md:gap-5 py-2 text-white">
                 <div class="relative">
-                    <div id="cart-count" class="absolute top-[-10px] left-3 right-1 w-4 h-4 flex justify-center  bg-primary rounded-full text-[10px]">
-                     
+                    <div id="cart-count" class="absolute top-[-10px] left-3 right-1 w-4 h-4 flex justify-center items-center bg-primary rounded-full text-[10px]">
+                        <?= $cartItemCount ?>
                     </div>
                     <a href="/pages/cart.php"><box-icon name='cart-alt' type='solid' color='#ffff'></box-icon></a>
                 </div>
@@ -52,6 +85,7 @@ $sql = mysqli_query($conn, $query);
             </div>
         </div>
     </nav>
+
     <div class="gap-5 flex justify-center py-5 md:px-20 px-5 items-center md:flex-row flex-col md:gap-10">
         <div class="md:w-1/2">
             <h1 class="text-white font-bold text-5xl">Vape RCF</h1>
@@ -120,99 +154,28 @@ $sql = mysqli_query($conn, $query);
     </div>
     <div class="md:px-20 px-5 grid grid-cols-2 md:grid-cols-5 gap-5">
         <?php while ($result = mysqli_fetch_assoc($sql)) { ?>
-            <div class="border-2 border-transparent hover:border-primary rounded duration-300 transition-all ease-in-out cursor-pointer p-2">
-                <img src="<?php echo $result['foto'] ?>" alt="" class="w-[200px] h-[200px] rounded object-cover md:object-fill">
+            <form method="POST" action="<?php echo $_SERVER['PHP_SELF']; ?>" class="border-2 border-transparent hover:border-primary rounded duration-300 transition-all ease-in-out cursor-pointer p-2">
+                <input type="hidden" name="action" value="add_to_cart">
+                <input type="hidden" name="namaBarang" value="<?php echo $result['nama_barang']; ?>">
+                <input type="hidden" name="hargaJual" value="<?php echo $result['harga_jual']; ?>">
+                <input type="hidden" name="foto" value="<?php echo $result['foto']; ?>">
+
+                <img src="<?php echo $result['foto']; ?>" alt="" class="w-[200px] h-[200px] rounded object-cover md:object-fill">
                 <div class="text-white mt-2">
-                    <p><?php echo $result['nama_barang'] ?></p>
-                    <p class="text-primary"><?php
-                                            echo "Rp" . number_format($result['harga_jual'], 0, ',', '.');
-                                            ?></p>
+                    <p><?php echo $result['nama_barang']; ?></p>
+                    <p class="text-primary">
+                        <?php echo "Rp" . number_format($result['harga_jual'], 0, ',', '.'); ?>
+                    </p>
                 </div>
                 <div class="flex justify-center">
-                    <button
-                        class="text-white bg-primary hover:bg-green-500 px-4 py-2 rounded duration-300 ease-in-out transition-all text-sm mt-2"
-                        onclick="addToCart('<?php echo $result['nama_barang'] ?>', <?php echo $result['harga_jual'] ?>, '<?php echo $result['foto'] ?>')">
+                    <button type="submit" class="text-white bg-primary hover:bg-green-500 px-4 py-2 rounded duration-300 ease-in-out transition-all text-sm mt-2">
                         Tambah ke keranjang
                     </button>
                 </div>
-            </div>
+            </form>
         <?php } ?>
     </div>
     <div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 1000;"></div>
-
-    <script>
-        function addToCart(namaBarang, hargaJual, foto) {
-          
-            const item = {
-                namaBarang: namaBarang,
-                hargaJual: hargaJual,
-                foto: foto
-            };
-
-
-            let cart = JSON.parse(localStorage.getItem('cart')) || [];
-
-
-            cart.push(item);
-
-
-            localStorage.setItem('cart', JSON.stringify(cart));
-
-            showToast('Item berhasil ditambahkan ke keranjang!');
-        }
-
-        function updateCartCount() {
-      
-            let cart = JSON.parse(localStorage.getItem('cart')) || [];
-
-   
-            const cartCountElement = document.getElementById('cart-count');
-            cartCountElement.textContent = cart.length; 
-        }
-
-        function showToast(message) {
-            
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.style.cssText = `
-            background: rgba(0, 255, 13, 0.8);
-            color: white;
-            padding: 10px 20px;
-            margin-bottom: 10px;
-            border-radius: 5px;
-            font-size: 14px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-            animation: fadeOut 4s forwards;
-            position: relative;
-            opacity: 0;
-            animation: fadeInOut 3s ease-in-out;
-        `;
-            toast.textContent = message;
-
-            const toastContainer = document.getElementById('toast-container');
-            toastContainer.appendChild(toast);
-
-         
-            setTimeout(() => {
-                toast.remove();
-            }, 3000);
-        }
-
-    
-        const style = document.createElement('style');
-        style.innerHTML = `
-        @keyframes fadeInOut {
-            0% { opacity: 0; transform: translateY(10px); }
-            10% { opacity: 1; transform: translateY(0); }
-            90% { opacity: 1; transform: translateY(0); }
-            100% { opacity: 0; transform: translateY(10px); }
-        }
-    `;
-        document.head.appendChild(style);
-
-
-        document.addEventListener('DOMContentLoaded', updateCartCount);
-    </script>
 
     <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
 </body>

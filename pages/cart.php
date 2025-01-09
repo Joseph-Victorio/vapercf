@@ -1,3 +1,96 @@
+<?php
+session_start();
+include '../backend/db.php';
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// Initialize cart in session
+if (!isset($_SESSION['cart'])) {
+    $_SESSION['cart'] = [];
+}
+
+// Add item to cart
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_cart'])) {
+    $namaBarang = $_POST['nama_barang'];
+    $hargaJual = $_POST['harga_jual'];
+    $foto = $_POST['foto'];
+
+    // Check if item already exists in cart
+    $itemExists = false;
+    foreach ($_SESSION['cart'] as &$item) {
+        if ($item['namaBarang'] === $namaBarang) {
+            $item['quantity'] += 1;
+            $itemExists = true;
+            break;
+        }
+    }
+
+    if (!$itemExists) {
+        $_SESSION['cart'][] = [
+            'namaBarang' => $namaBarang,
+            'hargaJual' => $hargaJual,
+            'foto' => $foto,
+            'quantity' => 1
+        ];
+    }
+}
+
+// Update quantity
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_quantity'])) {
+    $namaBarang = $_POST['nama_barang'];
+    $action = $_POST['action'];
+
+    foreach ($_SESSION['cart'] as &$item) {
+        if ($item['namaBarang'] === $namaBarang) {
+            if ($action === 'increase') {
+                $item['quantity'] += 1;
+            } elseif ($action === 'decrease' && $item['quantity'] > 1) {
+                $item['quantity'] -= 1;
+            }
+            break;
+        }
+    }
+}
+
+// Remove item
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['remove_item'])) {
+    $namaBarang = $_POST['nama_barang'];
+
+    $_SESSION['cart'] = array_filter($_SESSION['cart'], function ($item) use ($namaBarang) {
+        return $item['namaBarang'] !== $namaBarang;
+    });
+}
+
+// Handle order submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_order'])) {
+    $name = $_POST['name'];
+    $address = $_POST['address'];
+    $orderId = "RCF" . rand(100000, 999999);
+    $cart = $_SESSION['cart'];
+
+    foreach ($cart as $item) {
+        $namaBarang = $item['namaBarang'];
+        $hargaJual = $item['hargaJual'];
+        $quantity = $item['quantity'];
+        $status = "Pending";
+
+        $sql = "INSERT INTO request_order (order_id, nama_barang, harga_jual, quantity, status, customer_name, customer_address) 
+                VALUES ('$orderId', '$namaBarang', $hargaJual, $quantity, '$status', '$name', '$address')";
+
+        if (!$conn->query($sql)) {
+            echo "Error: " . $sql . "<br>" . $conn->error;
+        }
+    }
+
+    // Clear cart after order submission
+    $_SESSION['cart'] = [];
+    header("Location: success_page.php");
+    exit();
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -5,7 +98,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Keranjang Belanja</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -25,21 +117,54 @@
 
 <body class="bg-background text-white">
     <div class="container mx-auto px-5 py-10">
+        <a href="/">Kembali</a>
         <h1 class="text-3xl font-bold mb-5">Keranjang Belanja</h1>
 
         <!-- Cart Items -->
-        <div id="cart-items" class="space-y-5"></div>
-
-        <!-- Total Price -->
-        <div id="cart-total" class="mt-5 text-right text-lg font-bold"></div>
-
-        <!-- Empty Cart Message -->
-        <div id="empty-cart-message" class="text-center text-gray-400 mt-10 hidden">
-            Keranjang belanja Anda kosong.
+        <div id="cart-items" class="space-y-5">
+            <?php if (!empty($_SESSION['cart'])): ?>
+                <?php $totalPrice = 0; ?>
+                <?php foreach ($_SESSION['cart'] as $item): ?>
+                    <?php $itemTotalPrice = $item['hargaJual'] * $item['quantity']; ?>
+                    <?php $totalPrice += $itemTotalPrice; ?>
+                    <div class="flex items-center justify-between bg-foreground p-4 rounded shadow">
+                        <div class="flex items-center gap-4">
+                            <img src="<?= $item['foto'] ?>" alt="<?= $item['namaBarang'] ?>" class="w-16 h-16 object-cover rounded">
+                            <div>
+                                <p class="font-bold"><?= $item['namaBarang'] ?></p>
+                                <p class="text-primary">Rp <?= number_format($item['hargaJual'], 0, ',', '.') ?> x <?= $item['quantity'] ?></p>
+                                <p>Total: Rp <?= number_format($itemTotalPrice, 0, ',', '.') ?></p>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <!-- Increase quantity -->
+                            <form method="POST" class="inline">
+                                <input type="hidden" name="nama_barang" value="<?= $item['namaBarang'] ?>">
+                                <input type="hidden" name="action" value="increase">
+                                <button type="submit" name="update_quantity" class="px-3 py-1 bg-green-600 text-white rounded">+</button>
+                            </form>
+                            <!-- Decrease quantity -->
+                            <form method="POST" class="inline">
+                                <input type="hidden" name="nama_barang" value="<?= $item['namaBarang'] ?>">
+                                <input type="hidden" name="action" value="decrease">
+                                <button type="submit" name="update_quantity" class="px-3 py-1 bg-red-600 text-white rounded">-</button>
+                            </form>
+                            <!-- Remove item -->
+                            <form method="POST" class="inline">
+                                <input type="hidden" name="nama_barang" value="<?= $item['namaBarang'] ?>">
+                                <button type="submit" name="remove_item" class="px-3 py-1 bg-gray-600 text-white rounded">Hapus</button>
+                            </form>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+                <div id="cart-total" class="mt-5 text-right text-lg font-bold">Total: Rp <?= number_format($totalPrice, 0, ',', '.') ?></div>
+            <?php else: ?>
+                <div id="empty-cart-message" class="text-center text-gray-400 mt-10">Keranjang belanja Anda kosong.</div>
+            <?php endif; ?>
         </div>
 
         <!-- Order Form -->
-        <form action="/backend/cart_logic.php" method="POST" class="mt-10">
+        <form method="POST" class="mt-10">
             <div class="mb-4">
                 <label for="name" class="block text-lg font-bold">Nama Lengkap</label>
                 <input type="text" id="name" name="name" required class="mt-2 p-2 w-full bg-foreground border border-primary rounded">
@@ -48,72 +173,9 @@
                 <label for="address" class="block text-lg font-bold">Alamat</label>
                 <textarea id="address" name="address" required class="mt-2 p-2 w-full bg-foreground border border-primary rounded"></textarea>
             </div>
-            <input type="hidden" id="order_id" name="order_id">
-            <button type="submit" class="px-5 py-2 bg-primary text-white rounded font-bold hover:bg-green-500 duration-300">Pesan Sekarang</button>
+            <button type="submit" name="submit_order" class="px-5 py-2 bg-primary text-white rounded font-bold hover:bg-green-500 duration-300">Pesan Sekarang</button>
         </form>
     </div>
-
-    <script>
-        function displayCartItems() {
-            const cartItemsContainer = document.getElementById('cart-items');
-            const cartTotalContainer = document.getElementById('cart-total');
-            const emptyCartMessage = document.getElementById('empty-cart-message');
-            const cart = JSON.parse(localStorage.getItem('cart')) || [];
-
-            cartItemsContainer.innerHTML = '';
-            cartTotalContainer.textContent = '';
-
-            if (cart.length === 0) {
-                emptyCartMessage.classList.remove('hidden');
-                return;
-            }
-
-            emptyCartMessage.classList.add('hidden');
-
-            const groupedCart = cart.reduce((acc, item) => {
-                const existingItem = acc.find((i) => i.namaBarang === item.namaBarang);
-                if (existingItem) {
-                    existingItem.quantity += 1;
-                } else {
-                    acc.push({ ...item, quantity: 1 });
-                }
-                return acc;
-            }, []);
-
-            let totalPrice = 0;
-
-            groupedCart.forEach((item) => {
-                const itemTotalPrice = item.hargaJual * item.quantity;
-                totalPrice += itemTotalPrice;
-
-                const itemElement = document.createElement('div');
-                itemElement.className = 'flex items-center justify-between bg-foreground p-4 rounded shadow';
-                itemElement.innerHTML = `
-                    <div class="flex items-center gap-4">
-                        <img src="${item.foto}" alt="${item.namaBarang}" class="w-16 h-16 object-cover rounded">
-                        <div>
-                            <p class="font-bold">${item.namaBarang}</p>
-                            <p class="text-primary">Rp ${item.hargaJual.toLocaleString('id-ID')} x ${item.quantity}</p>
-                            <p>Total: Rp ${itemTotalPrice.toLocaleString('id-ID')}</p>
-                        </div>
-                    </div>
-                `;
-                cartItemsContainer.appendChild(itemElement);
-            });
-
-            cartTotalContainer.textContent = `Total: Rp ${totalPrice.toLocaleString('id-ID')}`;
-            setOrderId();
-        }
-
-        function setOrderId() {
-            const orderIdField = document.getElementById('order_id');
-            const randomNumber = Math.floor(Math.random() * 1000000);
-            const orderId = 'RCF' + randomNumber;
-            orderIdField.value = orderId;
-        }
-
-        document.addEventListener('DOMContentLoaded', displayCartItems);
-    </script>
 </body>
 
 </html>
