@@ -109,7 +109,7 @@ $sql = mysqli_query($conn, $query);
             <div class="flex flex-col gap-2">
                 <p class="text-white font-bold">Liquid</p>
                 <p class="text-white">Mulai Dari <span class="text-primary"> Rp 130.000</span></p>
-                <a href="" class="rounded-full border-2 border-primary text-primary flex justify-center hover:bg-primary hover:text-white duration-300 transition-all font-bold">Beli Sekarang</a>
+                <a href="/pages/produkKami.php?search=&filter=Liquid" class="rounded-full border-2 border-primary text-primary flex justify-center hover:bg-primary hover:text-white duration-300 transition-all font-bold">Beli Sekarang</a>
             </div>
             <img src="/img/oatdrips.png" alt="oatdrips" class="w-[200px] object-fit object-cover">
         </div>
@@ -118,7 +118,7 @@ $sql = mysqli_query($conn, $query);
             <div class="flex flex-col gap-2 flex-grow-0 flex-shrink-0  ">
                 <p class="text-white font-bold">Pot</p>
                 <p class="text-white">Mulai Dari <span class="text-primary"> Rp 200.000</span></p>
-                <a href="" class="rounded-full border-2 border-primary text-primary flex justify-center hover:bg-primary hover:text-white duration-300 transition-all font-bold flex-grow-0">Beli Sekarang</a>
+                <a href="/pages/produkKami.php?search=&filter=Pot" class="rounded-full border-2 border-primary text-primary flex justify-center hover:bg-primary hover:text-white duration-300 transition-all font-bold flex-grow-0">Beli Sekarang</a>
             </div>
             <div>
                 <img src="/img/pot.png" alt="pot" class="w-[200px]">
@@ -130,7 +130,7 @@ $sql = mysqli_query($conn, $query);
             <div class="flex flex-col gap-2 flex-grow-0 flex-shrink-0 ">
                 <p class="text-white font-bold">Catridge</p>
                 <p class="text-white">Mulai Dari <span class="text-primary"> Rp 35.000</span></p>
-                <a href="" class="rounded-full border-2 border-primary text-primary flex justify-center hover:bg-primary hover:text-white duration-300 transition-all font-bold">Beli Sekarang</a>
+                <a href="/pages/produkKami.php?search=&filter=Catridge" class="rounded-full border-2 border-primary text-primary flex justify-center hover:bg-primary hover:text-white duration-300 transition-all font-bold">Beli Sekarang</a>
             </div>
             <div>
                 <img src="/img/catridge.png" alt="catridge" class="w-[200px]">
@@ -140,7 +140,7 @@ $sql = mysqli_query($conn, $query);
             <div class="flex flex-col gap-2 flex-grow-0 flex-shrink-0 ">
                 <p class="text-white font-bold">Salt Nic</p>
                 <p class="text-white">Mulai Dari <span class="text-primary"> Rp 100.000</span></p>
-                <a href="" class="rounded-full border-2 border-primary text-primary flex justify-center hover:bg-primary hover:text-white duration-300 transition-all font-bold">Beli Sekarang</a>
+                <a href="/pages/produkKami.php?search=&filter=Salt+nic" class="rounded-full border-2 border-primary text-primary flex justify-center hover:bg-primary hover:text-white duration-300 transition-all font-bold">Beli Sekarang</a>
             </div>
             <div>
                 <img src="/img/saltnic.png" alt="oatdrips" class="w-[200px]">
@@ -150,7 +150,7 @@ $sql = mysqli_query($conn, $query);
     </div>
     <div class="flex justify-between md:px-20 px-5 py-5 items-baseline">
         <p class="md:text-4xl font-bold text-primary">Produk Kami</p>
-        <a href="" class="text-gray-500 hover:text-white ease-in-out transition-color duration-300">Lihat Selengkapnya ></a>
+        <a href="/pages/produkKami.php" class="text-gray-500 hover:text-white ease-in-out transition-color duration-300">Lihat Selengkapnya ></a>
     </div>
     <div class="md:px-20 px-5 grid grid-cols-2 md:grid-cols-5 gap-5">
         <?php while ($result = mysqli_fetch_assoc($sql)) { ?>
