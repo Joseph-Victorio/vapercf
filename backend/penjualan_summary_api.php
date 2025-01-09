@@ -10,17 +10,17 @@ $method = $_SERVER['REQUEST_METHOD'];
 switch ($method) {
     case 'GET':
 
-        $kode_barang = isset($_GET['kode_barang']) ? mysqli_real_escape_string($conn, $_GET['kode_barang']) : null;
+        $nama_barang = isset($_GET['nama_barang']) ? mysqli_real_escape_string($conn, $_GET['nama_barang']) : null;
 
-        if ($kode_barang !== null) {
+        if ($nama_barang !== null) {
             $query = "
                 SELECT 
-                    p.kode_barang, 
+                    p.nama_barang, 
                     SUM(p.jumlah_jual * i.harga_jual) AS total_revenue
                 FROM penjualan p
-                JOIN inventory i ON p.kode_barang = i.kode_barang
-                WHERE p.kode_barang = '$kode_barang'
-                GROUP BY p.kode_barang
+                JOIN inventory i ON p.nama_barang = i.nama_barang
+                WHERE p.nama_barang = '$nama_barang'
+                GROUP BY p.nama_barang
             ";
             $result = mysqli_query($conn, $query);
             if ($result && mysqli_num_rows($result) > 0) {
@@ -33,18 +33,18 @@ switch ($method) {
         } else {
             $query = "
                 SELECT 
-                    p.kode_barang, 
+                    p.nama_barang, 
                     SUM(p.jumlah_jual * i.harga_jual) AS total_revenue
                 FROM penjualan p
-                JOIN inventory i ON p.kode_barang = i.kode_barang
-                GROUP BY p.kode_barang
+                JOIN inventory i ON p.nama_barang = i.nama_barang
+                GROUP BY p.nama_barang
             ";
             $result = mysqli_query($conn, $query);
             if ($result && mysqli_num_rows($result) > 0) {
                 $response = [];
                 while ($row = mysqli_fetch_assoc($result)) {
                     $response[] = array(
-                        'kode_barang' => $row['kode_barang'],
+                        'nama_barang' => $row['nama_barang'],
                         'total_revenue' => $row['total_revenue']
                     );
                 }

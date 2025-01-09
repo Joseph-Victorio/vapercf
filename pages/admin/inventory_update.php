@@ -135,6 +135,7 @@ if (isset($_GET['update'])) {
             </select>
             <div class="flex flex-col text-white">
                 <input type="text" name="kode_barang" value="<?php echo $kode_barang ?>" id="" class="text-black focus:outline-none px-2 w-[100px]" hidden>
+                <input type="text" name="nama_barang" value="<?php echo $nama_barang ?>" id="" class="text-black focus:outline-none px-2 w-[100px]" hidden>
             </div>
             <div class="flex flex-col text-white mt-3">
                 <input

@@ -7,7 +7,12 @@ fetch("../../backend/penjualan_api.php")
   })
   .then(data => {
     const labels = data.map(item => item.tanggal);
-    const salesData = data.map(item => item.total_jumlah_jual);
+    const salesData = data.map(item => {
+      return new Intl.NumberFormat('id-ID', { 
+          style: 'currency', 
+          currency: 'IDR' 
+      }).format(item.total_jumlah_jual);
+  });
 
     // Initialize the Chart
     const ctx = document.getElementById("myChart").getContext("2d");

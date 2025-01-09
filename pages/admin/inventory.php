@@ -94,13 +94,13 @@ $sql = mysqli_query($conn, $query);
     </nav>
 
 
-    <form action="/backend/inventory.php" method="post" class="flex flex-col md:w-[700px] mx-auto bg-foreground p-5 mt-10">
-        <div class="flex gap-2 md:flex-row flex-col">
+    <form action="/backend/inventory.php" method="post" enctype="multipart/form-data" class="flex flex-col md:w-[700px] mx-auto bg-foreground p-5 mt-10">
+        <div class="flex gap-2 md:flex-row flex-col items-center">
             <div class="flex flex-col text-white">
                 <label for="kode_barang" class="">Kode Barang</label>
                 <input type="text" name="kode_barang" id="" class="text-black focus:outline-none px-2 w-[100px]">
             </div>
-            <div class="flex flex-col text-white flex-1">
+            <div class="flex flex-col text-white">
                 <label for="nama_barang" class="">Nama Barang</label>
                 <input type="text" name="nama_barang" id="" class="text-black focus:outline-none px-2">
             </div>
@@ -108,6 +108,10 @@ $sql = mysqli_query($conn, $query);
                 <label for="kategori" class="">Kategori</label>
                 <input type="text" name="kategori" id="" class="text-black focus:outline-none px-2">
             </div>
+            <label for="foto" class="text-white py-2 px-4 bg-primary border-transparent border-[1px]  hover:border-primary  hover:bg-hover duration-200 ease-in-out transition-all cursor-pointer">
+                Input Gambar
+            </label>
+            <input type="file" name="foto" id="foto" class="text-black focus:outline-none px-2 hidden">
         </div>
         <div class="flex gap-2 md:flex-row flex-col justify-center">
             <div class="flex flex-col text-white">
@@ -123,8 +127,11 @@ $sql = mysqli_query($conn, $query);
                 <input type="number" name="harga_jual" id="" class="text-black focus:outline-none px-2">
             </div>
         </div>
-        <button type="submit" name="simpan" class="bg-primary text-white mt-5 font-bold border-transparent border-[1px]  hover:border-primary  hover:bg-hover duration-200 ease-in-out transition-all py-2">Simpan</button>
+        <button type="submit" name="simpan" class="bg-primary text-white mt-5 font-bold border-transparent border-[1px] hover:border-primary hover:bg-hover duration-200 ease-in-out transition-all py-2">
+            Simpan
+        </button>
     </form>
+
 
     <!-- Inventory Table -->
     <div class="md:w-[1000px] w-[350px] overflow-x-scroll md:overflow-hidden flex mx-auto">

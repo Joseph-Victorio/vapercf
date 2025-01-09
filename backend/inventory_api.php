@@ -35,6 +35,7 @@ switch ($method) {
                         'kode_barang' => $row['kode_barang'],
                         'nama_barang' => $row['nama_barang'],
                         'kategori' => $row['kategori'],
+                        'foto' => $row['foto'],
                         'stok_tersedia' => $row['stok_tersedia'],
                         'harga_beli' => $row['harga_beli'],
                         'harga_jual' => $row['harga_jual'],

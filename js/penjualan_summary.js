@@ -9,7 +9,7 @@ fetch("../../backend/penjualan_summary_api.php")
     if (data.error) {
       throw new Error("Error from API: " + data.error);
     }
-    const labels = data.map(item => item.kode_barang);
+    const labels = data.map(item => item.nama_barang);
     const salesData = data.map(item => item.total_revenue);
 
     const formattedSalesData = salesData.map(amount => 
