@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $itemNames = '';
 
 
-    $query = "INSERT INTO request_order (nama_pembeli, order_id, alamat, tanggal, status ) VALUES ( '$name', '$orderId', '$address','$tanggal', 'pending' )";
+    $query = "INSERT INTO request_order (nama_pembeli, order_id, nama_barang, alamat, tanggal, status ) VALUES ( '$name', '$orderId', '$nama_barang' '$address','$tanggal', 'pending' )";
 
     if (mysqli_query($conn, $query)) {
 

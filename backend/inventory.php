@@ -104,8 +104,7 @@ if (isset($_POST['tambah_stok'])) {
     $tanggal = mysqli_real_escape_string($conn, $tanggal);
 
 
-    $query = "INSERT INTO pembelian (kode_barang, nama_barang, jumlah_beli, tanggal) VALUES ('$kode_barang','$nama_barang' '$jumlah_beli', '$tanggal')";
-
+    $query = "INSERT INTO pembelian (kode_barang, nama_barang, jumlah_beli, tanggal) VALUES ('$kode_barang', '$nama_barang','$jumlah_beli','$tanggal')";
 
     if (mysqli_query($conn, $query)) {
 

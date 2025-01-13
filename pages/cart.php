@@ -69,6 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_order'])) {
     $address = $_POST['address'];
     $orderId = "RCF" . rand(100000, 999999);
     $cart = $_SESSION['cart'];
+    $tanggal = date('d-m-Y');
 
     foreach ($cart as $item) {
         $namaBarang = $item['namaBarang'];
@@ -76,8 +77,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_order'])) {
         $quantity = $item['quantity'];
         $status = "Pending";
 
-        $sql = "INSERT INTO request_order (order_id, nama_barang, harga_jual, quantity, status, customer_name, customer_address) 
-                VALUES ('$orderId', '$namaBarang', $hargaJual, $quantity, '$status', '$name', '$address')";
+        $sql = "INSERT INTO request_order (nama_pembeli, order_id, nama_barang, harga_jual, quantity,alamat,tanggal, status) 
+                VALUES ('$name','$orderId', '$namaBarang', '$hargaJual', '$quantity', '$address','$tanggal','$status')";
 
         if (!$conn->query($sql)) {
             echo "Error: " . $sql . "<br>" . $conn->error;
@@ -86,7 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_order'])) {
 
     // Clear cart after order submission
     $_SESSION['cart'] = [];
-    header("Location: success_page.php");
+    header("Location: https://wa.me/6281994280045?text=Send20%a20%quote");
     exit();
 }
 ?>
@@ -120,7 +121,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_order'])) {
         <a href="/">Kembali</a>
         <h1 class="text-3xl font-bold mb-5">Keranjang Belanja</h1>
 
-        <!-- Cart Items -->
         <div id="cart-items" class="space-y-5">
             <?php if (!empty($_SESSION['cart'])): ?>
                 <?php $totalPrice = 0; ?>
@@ -137,19 +137,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_order'])) {
                             </div>
                         </div>
                         <div class="flex gap-2">
-                            <!-- Increase quantity -->
                             <form method="POST" class="inline">
                                 <input type="hidden" name="nama_barang" value="<?= $item['namaBarang'] ?>">
                                 <input type="hidden" name="action" value="increase">
                                 <button type="submit" name="update_quantity" class="px-3 py-1 bg-green-600 text-white rounded">+</button>
                             </form>
-                            <!-- Decrease quantity -->
                             <form method="POST" class="inline">
                                 <input type="hidden" name="nama_barang" value="<?= $item['namaBarang'] ?>">
                                 <input type="hidden" name="action" value="decrease">
                                 <button type="submit" name="update_quantity" class="px-3 py-1 bg-red-600 text-white rounded">-</button>
                             </form>
-                            <!-- Remove item -->
                             <form method="POST" class="inline">
                                 <input type="hidden" name="nama_barang" value="<?= $item['namaBarang'] ?>">
                                 <button type="submit" name="remove_item" class="px-3 py-1 bg-gray-600 text-white rounded">Hapus</button>
@@ -162,8 +159,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_order'])) {
                 <div id="empty-cart-message" class="text-center text-gray-400 mt-10">Keranjang belanja Anda kosong.</div>
             <?php endif; ?>
         </div>
-
-        <!-- Order Form -->
         <form method="POST" class="mt-10">
             <div class="mb-4">
                 <label for="name" class="block text-lg font-bold">Nama Lengkap</label>
